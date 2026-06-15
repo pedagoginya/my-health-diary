@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#87A987">
+    <title>Мой Дневник Здоровья - Полная версия</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #F4F9F4;
+            --main-green: #A3D9A5;
+            --sage-green: #87A987;
+            --dark-green: #708238;
+            --light-peach: #FFD1DC;
+            --light-sand: #FFE5B4;
+            --main-blue: #7EC8E3;
+            --card-bg: #FFFFFF;
+            --text-main: #333;
+            --text-secondary: #666;
+            --shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 16px;
+            color: var(--text-main);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header .icon-wrap {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto;
+            border-radius: 50%;
+            background-color: var(--card-bg);
+            padding: 8px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header svg { width: 48px; height: 48px; fill: var(--main-green); }
+        header h1 { font-weight: 700; color: var(--sage-green); margin: 10px 0 0 0; font-size: 1.6rem; }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            color: var(--sage-green);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Тарелка (оставлена без изменений) */
+        .plate-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .plate-visual { text-align: center; }
+        .plate-container { width: min(220px, 55vw); height: min(220px, 55vw); margin: 0 auto; position: relative; }
+        #plate-svg { width: 100%; height: 100%; cursor: pointer; }
+        .plate-sector { cursor: pointer; transition: all 0.2s ease; }
+        .calories-summary { background: var(--bg-color); padding: 12px; border-radius: 16px; text-align: center; margin-top: 10px; }
+        .calories-summary .total { font-size: 1.8rem; font-weight: 700; color: var(--dark-green); }
+        .food-tables { max-height: 400px; overflow-y: auto; border-radius: 16px; }
+        .food-category { margin-bottom: 20px; }
+        .food-category h3 { background: var(--sage-green); color: white; padding: 8px 12px; border-radius: 12px; margin: 0 0 10px 0; font-size: 0.95rem; }
+        .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+        .food-item { background: var(--bg-color); padding: 8px 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
+        .food-item:active { transform: scale(0.97); background: var(--main-green); }
+
+        /* Водная батарейка (исправлена) */
+        .battery-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
+        .battery-container {
+            width: min(120px, 35vw);
+            height: min(240px, 60vw);
+            border: 4px solid var(--sage-green);
+            border-radius: 16px;
+            position: relative;
+            margin: 15px auto;
+            display: flex;
+            flex-direction: column-reverse;
+            padding: 5px;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+        .battery-container::after {
+            content: '';
+            width: min(50px, 15vw);
+            height: 14px;
+            background-color: var(--sage-green);
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 8px 8px 0 0;
+        }
+        .battery-segment {
+            width: 100%;
+            height: calc((100% / 8) - 2px);
+            background-color: #E0E0E0;
+            margin-bottom: 2px;
+            border-radius: 6px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform-origin: bottom;
+        }
+        .battery-segment.active {
+            background-color: var(--main-blue);
+            animation: waterFill 0.4s ease-out;
+        }
+        @keyframes waterFill {
+            0% { transform: scaleY(0); opacity: 0; }
+            100% { transform: scaleY(1); opacity: 1; }
+        }
+        #water-counter-display { font-weight: 600; margin: 10px 0; font-size: 1.1rem; color: var(--sage-green); }
+        #congrats { color: var(--dark-green); font-weight: 600; margin: 5px 0; }
+        .controls { display: flex; gap: 12px; justify-content: center; margin-top: 10px; }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+        button:active { transform: scale(0.96); }
+        .drink-btn { background: var(--main-green); color: white; }
+        .reset-btn { background: var(--light-peach); color: var(--text-main); }
+
+        /* Тренировки (восстановлено) */
+        .program-container { display: flex; flex-direction: column; gap: 10px; }
+        .day-block {
+            background: var(--bg-color);
+            padding: 14px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .day-block:active { background: var(--main-green); transform: scale(0.98); color: white; }
+        .day-block h4 { margin: 0 0 5px 0; font-size: 1.1rem; color: var(--dark-green); }
+        .day-block p { margin: 0; font-size: 0.85rem; color: var(--text-secondary); }
+        .day-block:active p { color: white; }
+        #open-modal-btn { width: 100%; margin-top: 12px; background: var(--bg-color); color: var(--sage-green); border: 1px solid var(--main-green); }
+
+        /* Модальное окно */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal.open { display: flex; }
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 28px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        #close-modal-btn {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+        }
+        .workout-detail-list { margin-top: 15px; }
+        .workout-detail-list h4 { color: var(--sage-green); margin: 15px 0 5px 0; }
+        .workout-detail-list ul { margin: 5px 0 10px 20px; }
+        .workout-detail-list li { margin: 8px 0; line-height: 1.4; }
+
+        @media (min-width: 800px) {
+            .dashboard-container { flex-direction: row; flex-wrap: wrap; }
+            .card { flex: 1 1 calc(50% - 16px); }
+            .plate-section { flex-direction: row; align-items: flex-start; }
+            .plate-visual { flex: 1; }
+            .food-tables { flex: 1; max-height: 450px; }
+        }
+        @media (min-width: 1100px) {
+            .card { flex: 1 1 calc(33.33% - 16px); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="icon-wrap">
+        <svg viewBox="0 0 100 100"><path d="M50,15.6c0,2.8-2.3,5.1-5.1,5.1s-5.1-2.3-5.1-5.1s2.3-5.1,5.1-5.1S50,12.8,50,15.6z M46.4,26.6c0,1.4-1.1,2.5-2.5,2.5s-2.5-1.1-2.5-2.5s1.1-2.5,2.5-2.5S46.4,25.2,46.4,26.6z" fill="#708238"/><path d="M37.8,38.1l-6.2,25.4c-0.6,2.6,0.9,5.2,3.5,5.8l1.4,0.3c2.6,0.6,5.2-0.9,5.8-3.5l5-20.4l7.2,5.5l-2.1,14.1c-0.3,2.7,1.5,5.3,4.2,5.6l1.7,0.2c2.7,0.3,5.3-1.5,5.6-4.2l2.9-20.1c0.4-2.7-1.2-5.3-3.9-5.9l-12.4-2.7l-0.9-6.5c-0.3-2.7-2.8-4.6-5.5-4.2l-1.4,0.2C37.8,32.3,35.9,34.7,35.3,37.3z" fill="#A3D9A5"/></svg>
+    </div>
+    <h1>Мой Дневник Здоровья</h1>
+</header>
+
+<div class="dashboard-container">
+    <!-- ТАРЕЛКА (без изменений) -->
+    <div class="card">
+        <h2>🍽️ Умная Тарелка</h2>
+        <div class="plate-section">
+            <div class="plate-visual">
+                <div class="plate-container">
+                    <svg id="plate-svg" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="17" fill="#eee" stroke="#ccc"/>
+                        <circle cx="18" cy="18" r="15.9" fill="#fff"/>
+                        <path class="plate-sector" data-cat="veg" d="M18,18 L18,2 A16,16 0 0,1 18,34 Z" fill="#A3D9A5" style="opacity:0.85"></path>
+                        <path class="plate-sector" data-cat="protein" d="M18,18 L18,34 A16,16 0 0,1 2,18 Z" fill="#FFD1DC" style="opacity:0.85"></path>
+                        <path class="plate-sector" data-cat="carbs" d="M18,18 L2,18 A16,16 0 0,1 18,2 Z" fill="#FFE5B4" style="opacity:0.85"></path>
+                        <circle cx="18" cy="18" r="1.5" fill="#fff" stroke="#ccc"/>
+                    </svg>
+                </div>
+                <div class="calories-summary">
+                    <h3>🔥 Калорийность порции</h3>
+                    <div class="total" id="total-calories">0</div>
+                    <div style="font-size:12px; color:#666;">нажми на продукт → добавится в тарелку</div>
+                </div>
+            </div>
+            <div class="food-tables" id="food-tables"></div>
+        </div>
+    </div>
+
+    <!-- ВОДНАЯ БАТАРЕЙКА (исправлена) -->
+    <div class="card">
+        <h2>💧 Водный режим</h2>
+        <div class="battery-wrap">
+            <div id="water-status">💧 Дневная цель: 8 стаканов</div>
+            <div id="congrats" style="display: none;">✨ Отличная работа! Цель достигнута! 🎉 ✨</div>
+            <div class="battery-container" id="water-battery">
+                <div class="battery-segment"></div><div class="battery-segment"></div><div class="battery-segment"></div>
+                <div class="battery-segment"></div><div class="battery-segment"></div><div class="battery-segment"></div>
+                <div class="battery-segment"></div><div class="battery-segment"></div>
+            </div>
+            <div id="water-counter-display">🥤 Выпито 0 из 8</div>
+            <div class="controls">
+                <button class="drink-btn" id="addWaterBtn"><i class="fas fa-plus"></i> Добавить стакан</button>
+                <button class="reset-btn" id="resetWaterBtn"><i class="fas fa-undo"></i> Сброс</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ТРЕНИРОВКИ (полностью восстановлены с подробной программой) -->
+    <div class="card">
+        <h2>💪 Программа тренировок</h2>
+        <div class="program-container">
+            <div class="day-block" data-day="mon">
+                <h4>🏋️ ПОНЕДЕЛЬНИК</h4>
+                <p>Силовая тренировка (60 мин) — гантели, тумба, коврик</p>
+            </div>
+            <div class="day-block" data-day="wed">
+                <h4>🏊 СРЕДА</h4>
+                <p>Аквааэробика (60 мин) — бассейн, нудлс</p>
+            </div>
+            <div class="day-block" data-day="fri">
+                <h4>🔥 ПЯТНИЦА</h4>
+                <p>Силовая тренировка (60 мин) — гантели, коврик</p>
+            </div>
+            <div class="day-block" data-day="sun">
+                <h4>🧘 ВОСКРЕСЕНЬЕ</h4>
+                <p>Стретчинг / Пилатес (60 мин) — коврик, мяч, лента</p>
+            </div>
+        </div>
+        <button id="open-modal-btn"><i class="fas fa-calendar-alt"></i> Подробное расписание</button>
+    </div>
+</div>
+
+<!-- Модальное окно -->
+<div class="modal" id="workout-modal">
+    <div class="modal-content">
+        <button id="close-modal-btn">&times;</button>
+        <h3 id="modal-day-title">Тренировка</h3>
+        <div id="modal-workout-details" class="workout-detail-list"></div>
+    </div>
+</div>
+
+<script>
+    // ========== 1. ТАРЕЛКА (без изменений, работает) ==========
+    const foodDatabase = {
+        protein: [
+            { name: "Куриная грудка", kcal: 110 }, { name: "Индейка", kcal: 120 }, { name: "Говядина постная", kcal: 158 },
+            { name: "Яйцо целое", kcal: 157 }, { name: "Яичный белок", kcal: 48 }, { name: "Творог 5%", kcal: 121 },
+            { name: "Творог 0%", kcal: 71 }, { name: "Греческий йогурт", kcal: 60 }, { name: "Треска", kcal: 75 },
+            { name: "Минтай", kcal: 72 }, { name: "Лосось", kcal: 180 }, { name: "Скумбрия", kcal: 200 },
+            { name: "Тунец", kcal: 100 }, { name: "Креветки", kcal: 95 }, { name: "Тофу", kcal: 76 }
+        ],
+        carbs: [
+            { name: "Гречка варёная", kcal: 110 }, { name: "Рис бурый", kcal: 110 }, { name: "Киноа", kcal: 120 },
+            { name: "Овсянка", kcal: 88 }, { name: "Макароны тв.сорта", kcal: 130 }, { name: "Картофель варёный", kcal: 82 },
+            { name: "Батат", kcal: 90 }, { name: "Фасоль варёная", kcal: 95 }, { name: "Цельнозерн. хлеб", kcal: 230 },
+            { name: "Чечевица", kcal: 110 }, { name: "Нут", kcal: 130 }, { name: "Горох", kcal: 115 }
+        ],
+        veg: [
+            { name: "Огурец", kcal: 15 }, { name: "Помидор", kcal: 20 }, { name: "Перец болгарский", kcal: 27 },
+            { name: "Капуста белокочанная", kcal: 25 }, { name: "Брокколи", kcal: 34 }, { name: "Цветная капуста", kcal: 30 },
+            { name: "Кабачок", kcal: 24 }, { name: "Спаржа", kcal: 20 }, { name: "Листовой салат", kcal: 15 },
+            { name: "Стручковая фасоль", kcal: 31 }, { name: "Шампиньоны", kcal: 27 }, { name: "Сельдерей", kcal: 16 },
+            { name: "Редис", kcal: 20 }, { name: "Зелень", kcal: 45 }
+        ],
+        fats: [
+            { name: "Масло оливковое", kcal: 884 }, { name: "Авокадо", kcal: 160 }, { name: "Миндаль", kcal: 600 },
+            { name: "Грецкий орех", kcal: 650 }, { name: "Семена чиа", kcal: 486 }
+        ],
+        fruits: [
+            { name: "Яблоко", kcal: 52 }, { name: "Груша", kcal: 57 }, { name: "Апельсин", kcal: 47 },
+            { name: "Клубника", kcal: 32 }, { name: "Банан", kcal: 89 }, { name: "Киви", kcal: 61 }
+        ]
+    };
+
+    let plateState = { protein: [], carbs: [], veg: [] };
+    let extraItems = [];
+
+    function renderFoodTables() {
+        const container = document.getElementById('food-tables');
+        const categories = [
+            { title: "🍗 Белки", key: "protein", color: "#FFD1DC" },
+            { title: "🍚 Углеводы", key: "carbs", color: "#FFE5B4" },
+            { title: "🥦 Овощи", key: "veg", color: "#A3D9A5" },
+            { title: "🥑 Жиры", key: "fats", isExtra: true },
+            { title: "🍎 Фрукты", key: "fruits", isExtra: true }
+        ];
+        let html = '';
+        for (let cat of categories) {
+            html += `<div class="food-category"><h3 style="background:${cat.color || '#87A987'};">${cat.title}</h3><div class="food-grid">`;
+            let items = cat.isExtra ? foodDatabase[cat.key] : foodDatabase[cat.key];
+            for (let food of items) {
+                html += `<div class="food-item" data-category="${cat.key}" data-name="${food.name}" data-kcal="${food.kcal}" data-isextra="${cat.isExtra || false}">
+                            <span class="food-name">${food.name}</span>
+                            <span class="food-cal">${food.kcal} ккал</span>
+                         </div>`;
+            }
+            html += `</div></div>`;
+        }
+        container.innerHTML = html;
+        document.querySelectorAll('.food-item').forEach(el => {
+            el.addEventListener('click', () => {
+                const isExtra = el.dataset.isextra === 'true';
+                const kcal = parseInt(el.dataset.kcal);
+                const name = el.dataset.name;
+                if (isExtra) {
+                    extraItems.push({ name, kcal });
+                } else {
+                    const category = el.dataset.category;
+                    if (!plateState[category]) plateState[category] = [];
+                    plateState[category].push({ name, kcal });
+                }
+                updateTotalCalories();
+            });
+        });
+    }
+
+    function updateTotalCalories() {
+        let total = 0;
+        for (let cat of ['protein', 'carbs', 'veg']) {
+            total += plateState[cat].reduce((sum, item) => sum + item.kcal, 0);
+        }
+        total += extraItems.reduce((sum, item) => sum + item.kcal, 0);
+        document.getElementById('total-calories').innerText = total;
+        localStorage.setItem('plateState', JSON.stringify({ protein: plateState.protein, carbs: plateState.carbs, veg: plateState.veg, extra: extraItems }));
+    }
+
+    function loadPlateState() {
+        const saved = localStorage.getItem('plateState');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                plateState.protein = data.protein || [];
+                plateState.carbs = data.carbs || [];
+                plateState.veg = data.veg || [];
+                extraItems = data.extra || [];
+                updateTotalCalories();
+            } catch(e) {}
+        }
+    }
+
+    // ========== 2. ВОДА (ИСПРАВЛЕНО - работает и анимируется) ==========
+    let waterCups = 0;
+    const totalCups = 8;
+    let segments = [];
+    const waterCounter = document.getElementById('water-counter-display');
+    const congratsDiv = document.getElementById('congrats');
+
+    function updateWaterUI() {
+        waterCounter.innerText = `🥤 Выпито ${waterCups} из ${totalCups}`;
+        for (let i = 0; i < totalCups; i++) {
+            if (segments[i]) {
+                if (i < waterCups) {
+                    segments[i].classList.add('active');
+                } else {
+                    segments[i].classList.remove('active');
+                }
+            }
+        }
+        if (waterCups === totalCups) {
+            congratsDiv.style.display = 'block';
+            if ('vibrate' in navigator) navigator.vibrate(200);
+        } else {
+            congratsDiv.style.display = 'none';
+        }
+        localStorage.setItem('health_diary_water', waterCups);
+    }
+
+    function addWater() {
+        if (waterCups < totalCups) {
+            waterCups++;
+            updateWaterUI();
+            // Анимация батарейки
+            const battery = document.getElementById('water-battery');
+            battery.style.boxShadow = '0 0 20px var(--main-blue)';
+            setTimeout(() => { battery.style.boxShadow = 'none'; }, 300);
+            if ('vibrate' in navigator) navigator.vibrate(50);
+        }
+    }
+
+    function resetWater() {
+        waterCups = 0;
+        updateWaterUI();
+        if ('vibrate' in navigator) navigator.vibrate(50);
+    }
+
+    function loadWater() {
+        const saved = localStorage.getItem('health_diary_water');
+        if (saved !== null) waterCups = Math.min(totalCups, Math.max(0, parseInt(saved) || 0));
+        segments = document.querySelectorAll('#water-battery .battery-segment');
+        updateWaterUI();
+    }
+
+    // ========== 3. ТРЕНИРОВКИ (полное восстановление с подробной программой) ==========
+    const workoutDetails = {
+        mon: {
+            title: "🏋️ ПОНЕДЕЛЬНИК - Силовая тренировка (60 мин)",
+            content: `
+                <h4>📦 Инвентарь:</h4>
+                <p>Тумба, коврик, гантели (вес индивидуально)</p>
+                <h4>🔥 Разминка (10 мин):</h4>
+                <p>На все части тела (суставная гимнастика)</p>
+                <h4>💪 Основная часть (40 мин):</h4>
+                <p><strong>3 подхода по 12–15 повторений</strong></p>
+                <ul>
+                    <li>Зашагивание на деревянную тумбу</li>
+                    <li>Классические приседания до 90°</li>
+                    <li>Выпады назад</li>
+                    <li>Подъём корпуса из положения лёжа на животе</li>
+                    <li>Тяга гантели в наклоне</li>
+                    <li>Отжимания с колен — 3×10</li>
+                    <li>Планка на локтях — 3×20 сек</li>
+                    <li>Лёжа на спине, подъём ног до 90° — 3×10</li>
+                </ul>
+                <h4>🧘 Заключительная часть (10 мин):</h4>
+                <p>Восстановительная растяжка</p>
+            `
+        },
+        wed: {
+            title: "🏊 СРЕДА - Аквааэробика (60 мин)",
+            content: `
+                <h4>📦 Инвентарь:</h4>
+                <p>Нудлс, бассейн (глубина по грудь или пояс)</p>
+                <h4>🔥 Разминка (10 мин):</h4>
+                <p>Спокойная ходьба по дну, дыхательные упражнения</p>
+                <h4>💪 Основная часть (40 мин):</h4>
+                <ul>
+                    <li><strong>Блок махов:</strong> махи ногой вперёд/назад/в сторону</li>
+                    <li>«Лыжник» — прыжки из стороны в сторону</li>
+                    <li>Бег с высоким подниманием колена</li>
+                    <li><strong>Силовые в воде:</strong> тяга нудлса к груди, разгибание спины</li>
+                    <li>«Крылья» — разведение прямых рук назад</li>
+                    <li><strong>Ноги и ягодицы:</strong> отведение ноги назад, «ножницы»</li>
+                    <li>Приседания у бортика, ягодичный мостик в воде</li>
+                    <li>Прыжки «Звезда», подъём ног у бортика (пресс)</li>
+                    <li>«Велосипед» в воде, расслабление</li>
+                </ul>
+                <h4>🧘 Заключительная часть (10 мин):</h4>
+                <p>Заминка и растяжка в воде</p>
+            `
+        },
+        fri: {
+            title: "🔥 ПЯТНИЦА - Силовая тренировка (60 мин)",
+            content: `
+                <h4>📦 Инвентарь:</h4>
+                <p>Коврик, гантели (вес индивидуально)</p>
+                <h4>🔥 Разминка (10 мин):</h4>
+                <p>На все части тела</p>
+                <h4>💪 Основная часть (45 мин):</h4>
+                <p><strong>2–3 подхода по 12–15 повторений, отдых 30–45 сек</strong></p>
+                <ul>
+                    <li>Приседания с гантелями у стены</li>
+                    <li>Жим гантелей лёжа на спине (на полу)</li>
+                    <li>Тяга гантели в наклоне с опорой на стул</li>
+                    <li>Ягодичный мостик на двух ногах (с гантелью на животе)</li>
+                    <li>Разгибание рук с гантелью из-за головы сидя (трицепс) — 2 подхода</li>
+                    <li>Подъём гантелей перед собой (стоя, лёгкий вес)</li>
+                    <li>Скручивания на пресс — 2×15–20 раз</li>
+                    <li>Планка на прямых руках — 30–45 сек</li>
+                </ul>
+                <h4>🧘 Заключительная часть (5 мин):</h4>
+                <p>Восстановительная растяжка</p>
+            `
+        },
+        sun: {
+            title: "🧘 ВОСКРЕСЕНЬЕ - Стретчинг / Пилатес (60 мин)",
+            content: `
+                <h4>📦 Инвентарь:</h4>
+                <p>Коврик, небольшой мяч (20–25 см), эластичная лента</p>
+                <h4>🔥 Разминка (10 мин):</h4>
+                <p>Дыхание, нейтральное положение таза, наклоны головы, круговые движения плечами</p>
+                <h4>💪 Основная часть (40 мин):</h4>
+                <ul>
+                    <li>«Кошка/корова» на четвереньках — 3 мин</li>
+                    <li>The Hundred (сотня) — 3 подхода</li>
+                    <li>Roll Up с согнутыми коленями — 5–6 раз</li>
+                    <li>Single Leg Stretch — по 8 раз на ногу</li>
+                    <li>Open Leg Rocker — 4–6 раз</li>
+                    <li>Side Kicks (махи вперёд-назад) — по 10 раз</li>
+                    <li>Clam (ракушка) с лентой — по 12 раз</li>
+                    <li>Планка на коленях («стол») — 3×30 сек</li>
+                    <li>«Лебедь» — 6 повторов</li>
+                    <li>Saw (пила) сидя — 6–8 повторов</li>
+                    <li>Растяжка спины на мяче — 2 мин</li>
+                    <li>Наклон к прямым ногам сидя — 1 мин</li>
+                    <li>Поза ребенка (Balasana) — 2 мин</li>
+                    <li>Растяжка груди у стены — по 1 мин</li>
+                </ul>
+                <h4>🧘 Заключительная часть (10 мин):</h4>
+                <p>Лёгкое дыхание и полное расслабление (шавасана) — 4 мин</p>
+            `
+        }
+    };
+
+    const modal = document.getElementById('workout-modal');
+    const modalTitle = document.getElementById('modal-day-title');
+    const modalBody = document.getElementById('modal-workout-details');
+
+    function openWorkoutModal(day) {
+        const plan = workoutDetails[day];
+        if (plan) {
+            modalTitle.innerText = plan.title;
+            modalBody.innerHTML = plan.content;
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    // Назначение обработчиков
+    document.querySelectorAll('.day-block').forEach(block => {
+        block.addEventListener('click', () => openWorkoutModal(block.dataset.day));
+    });
+    document.getElementById('open-modal-btn').addEventListener('click', () => openWorkoutModal('fri'));
+    document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    // Кнопки воды
+    document.getElementById('addWaterBtn').addEventListener('click', addWater);
+    document.getElementById('resetWaterBtn').addEventListener('click', resetWater);
+
+    // Инициализация
+    renderFoodTables();
+    loadPlateState();
+    loadWater();
+</script>
+</body>
+</html>
