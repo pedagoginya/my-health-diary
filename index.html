@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#87A987">
+    <title>Мой Дневник Здоровья - Полная версия</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #F4F9F4;
+            --main-green: #A3D9A5;
+            --sage-green: #87A987;
+            --dark-green: #708238;
+            --light-peach: #FFD1DC;
+            --light-sand: #FFE5B4;
+            --main-blue: #7EC8E3;
+            --card-bg: #FFFFFF;
+            --text-main: #333;
+            --text-secondary: #666;
+            --shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 16px;
+            color: var(--text-main);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header .icon-wrap {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto;
+            border-radius: 50%;
+            background-color: var(--card-bg);
+            padding: 8px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header svg { width: 48px; height: 48px; fill: var(--main-green); }
+        header h1 { font-weight: 700; color: var(--sage-green); margin: 10px 0 0 0; font-size: 1.6rem; }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            color: var(--sage-green);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .plate-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .plate-visual { text-align: center; }
+        .plate-container { width: min(220px, 55vw); height: min(220px, 55vw); margin: 0 auto; position: relative; }
+        #plate-svg { width: 100%; height: 100%; cursor: pointer; }
+        .plate-sector { cursor: pointer; transition: all 0.2s ease; }
+        .plate-sector:hover { opacity: 0.7; }
+        .calories-summary { background: var(--bg-color); padding: 12px; border-radius: 16px; text-align: center; margin-top: 10px; }
+        .calories-summary .total { font-size: 1.8rem; font-weight: 700; color: var(--dark-green); }
+        .food-tables { max-height: 400px; overflow-y: auto; border-radius: 16px; }
+        .food-category { margin-bottom: 20px; }
+        .food-category h3 { background: var(--sage-green); color: white; padding: 8px 12px; border-radius: 12px; margin: 0 0 10px 0; font-size: 0.95rem; }
+        .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+        .food-item { background: var(--bg-color); padding: 8px 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
+        .food-item:active { transform: scale(0.97); background: var(--main-green); }
+
+        .battery-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
+        .battery-container {
+            width: min(120px, 35vw);
+            height: min(240px, 60vw);
+            border: 4px solid var(--sage-green);
+            border-radius: 16px;
+            position: relative;
+            margin: 15px auto;
+            display: flex;
+            flex-direction: column-reverse;
+            padding: 5px;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+        .battery-container::after {
+            content: '';
+            width: min(50px, 15vw);
+            height: 14px;
+            background-color: var(--sage-green);
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 8px 8px 0 0;
+        }
+        .battery-segment {
+            width: 100%;
+            height: calc((100% / 8) - 2px);
+            background-color: #E0E0E0;
+            margin-bottom: 2px;
+            border-radius: 6px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .battery-segment.active {
+            background-color: var(--main-blue);
+        }
+        #water-counter-display { font-weight: 600; margin: 10px 0; font-size: 1.1rem; color: var(--sage-green); }
+        #congrats { color: var(--dark-green); font-weight: 600; margin: 5px 0; }
+        .controls { display: flex; gap: 12px; justify-content: center; margin-top: 10px; }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+        button:active { transform: scale(0.96); }
+        .drink-btn { background: var(--main-green); color: white; }
+        .reset-btn { background: var(--light-peach); color: var(--text-main); }
+
+        .program-container { display: flex; flex-direction: column; gap: 10px; }
+        .day-block {
+            background: var(--bg-color);
+            padding: 14px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .day-block:active { background: var(--main-green); transform: scale(0.98); color: white; }
+        .day-block h4 { margin: 0 0 5px 0; font-size: 1.1rem; color: var(--dark-green); }
+        .day-block p { margin: 0; font-size: 0.85rem; color: var(--text-secondary); }
+        #open-modal-btn { width: 100%; margin-top: 12px; background: var(--bg-color); color: var(--sage-green); border: 1px solid var(--main-green); }
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal.open { display: flex; }
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 28px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        #close-modal-btn {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+        }
+        .workout-detail-list { margin-top: 15px; }
+        .workout-detail-list h4 { color: var(--sage-green); margin: 15px 0 5px 0; }
+        .workout-detail-list ul { margin: 5px 0 10px 20px; }
+        .workout-detail-list li { margin: 8px 0; line-height: 1.4; }
+
+        @media (min-width: 800px) {
+            .dashboard-container { flex-direction: row; flex-wrap: wrap; }
+            .card { flex: 1 1 calc(50% - 16px); }
+            .plate-section { flex-direction: row; align-items: flex-start; }
+            .plate-visual { flex: 1; }
+            .food-tables { flex: 1; max-height: 450px; }
+        }
+        @media (min-width: 1100px) {
+            .card { flex: 1 1 calc(33.33% - 16px); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="icon-wrap">
+        <svg viewBox="0 0 100 100"><path d="M50,15.6c0,2.8-2.3,5.1-5.1,5.1s-5.1-2.3-5.1-5.1s2.3-5.1,5.1-5.1S50,12.8,50,15.6z M46.4,26.6c0,1.4-1.1,2.5-2.5,2.5s-2.5-1.1-2.5-2.5s1.1-2.5,2.5-2.5S46.4,25.2,46.4,26.6z" fill="#708238"/><path d="M37.8,38.1l-6.2,25.4c-0.6,2.6,0.9,5.2,3.5,5.8l1.4,0.3c2.6,0.6,5.2-0.9,5.8-3.5l5-20.4l7.2,5.5l-2.1,14.1c-0.3,2.7,1.5,5.3,4.2,5.6l1.7,0.2c2.7,0.3,5.3-1.5,5.6-4.2l2.9-20.1c0.4-2.7-1.2-5.3-3.9-5.9l-12.4-2.7l-0.9-6.5c-0.3-2.7-2.8-4.6-5.5-4.2l-1.4,0.2C37.8,32.3,35.9,34.7,35.3,37.3z" fill="#A3D9A5"/></svg>
+    </div>
+    <h1>Мой Дневник Здоровья</h1>
+</header>
+
+<div class="dashboard-container">
+    <div class="card">
+        <h2>🍽️ Умная Тарелка</h2>
+        <div class="plate-section">
+            <div class="plate-visual">
+                <div class="plate-container">
+                    <svg id="plate-svg" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="17" fill="#eee" stroke="#ccc"/>
+                        <circle cx="18" cy="18" r="15.9" fill="#fff"/>
+                        <path class="plate-sector" data-cat="veg" d="M18,18 L18,2 A16,16 0 0,1 18,34 Z" fill="#A3D9A5" style="opacity:0.85"></path>
+                        <path class="plate-sector" data-cat="protein" d="M18,18 L18,34 A16,16 0 0,1 2,18 Z" fill="#FFD1DC" style="opacity:0.85"></path>
+                        <path class="plate-sector" data-cat="carbs" d="M18,18 L2,18 A16,16 0 0,1 18,2 Z" fill="#FFE5B4" style="opacity:0.85"></path>
+                        <circle cx="18" cy="18" r="1.5" fill="#fff" stroke="#ccc"/>
+                    </svg>
+                </div>
+                <div class="calories-summary">
+                    <h3>🔥 Калорийность порции</h3>
+                    <div class="total" id="total-calories">0</div>
+                    <div style="font-size:12px; color:#666;">нажми на продукт → добавится в тарелку</div>
+                </div>
+            </div>
+            <div class="food-tables" id="food-tables"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>💧 Водный режим</h2>
+        <div class="battery-wrap">
+            <div id="water-status">💧 Дневная цель: 8 стаканов</div>
+            <div id="congrats" style="display: none;">✨ Отличная работа! Цель достигнута! 🎉 ✨</div>
+            <div class="battery-container" id="water-battery"></div>
+            <div id="water-counter-display">🥤 Выпито 0 из 8</div>
+            <div class="controls">
+                <button class="drink-btn" id="addWaterBtn"><i class="fas fa-plus"></i> Добавить стакан</button>
+                <button class="reset-btn" id="resetWaterBtn"><i class="fas fa-undo"></i> Сброс</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>💪 Программа тренировок</h2>
+        <div class="program-container">
+            <div class="day-block" data-day="mon">
+                <h4>🏋️ ПОНЕДЕЛЬНИК</h4>
+                <p>Силовая тренировка (60 мин) — гантели, тумба, коврик</p>
+            </div>
+            <div class="day-block" data-day="wed">
+                <h4>🏊 СРЕДА</h4>
+                <p>Аквааэробика (60 мин) — бассейн, нудлс</p>
+            </div>
+            <div class="day-block" data-day="fri">
+                <h4>🔥 ПЯТНИЦА</h4>
+                <p>Силовая тренировка (60 мин) — гантели, коврик</p>
+            </div>
+            <div class="day-block" data-day="sun">
+                <h4>🧘 ВОСКРЕСЕНЬЕ</h4>
+                <p>Стретчинг / Пилатес (60 мин) — коврик, мяч, лента</p>
+            </div>
+        </div>
+        <button id="open-modal-btn"><i class="fas fa-calendar-alt"></i> Подробное расписание</button>
+    </div>
+</div>
+
+<div class="modal" id="workout-modal">
+    <div class="modal-content">
+        <button id="close-modal-btn">&times;</button>
+        <h3 id="modal-day-title">Тренировка</h3>
+        <div id="modal-workout-details" class="workout-detail-list"></div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ========== ДАННЫЕ ПРОДУКТОВ ==========
+        const products = {
+            veg: [
+                { name: "🥦 Брокколи", cal: 55 },
+                { name: "🥕 Морковь", cal: 41 },
+                { name: "🍅 Помидоры", cal: 18 },
+                { name: "🥒 Огурец", cal: 15 },
+                { name: "🥗 Салат", cal: 15 },
+                { name: "🫑 Перец", cal: 31 },
+                { name: "🍆 Баклажан", cal: 25 },
+                { name: "🎃 Тыква", cal: 26 }
+            ],
+            protein: [
+                { name: "🍗 Курица", cal: 165 },
+                { name: "🐟 Рыба", cal: 140 },
+                { name: "🥩 Говядина", cal: 250 },
+                { name: "🥚 Яйца", cal: 155 },
+                { name: "🫘 Фасоль", cal: 132 },
+                { name: "🧀 Тофу", cal: 76 },
+                { name: "🍤 Креветки", cal: 99 },
+                { name: "🐷 Свинина постная", cal: 242 }
+            ],
+            carbs: [
+                { name: "🍚 Рис", cal: 130 },
+                { name: "🍞 Хлеб", cal: 265 },
+                { name: "🍝 Паста", cal: 131 },
+                { name: "🥔 Картофель", cal: 77 },
+                { name: "🌽 Кукуруза", cal: 86 },
+                { name: "🥨 Овсянка", cal: 68 },
+                { name: "🍠 Батат", cal: 86 },
+                { name: "🥖 Киноа", cal: 120 }
+            ]
+        };
+
+        let currentMeal = { veg: [], protein: [], carbs: [] };
+
+        // ========== ВОДА ==========
+        let waterCount = 0;
+        const WATER_GOAL = 8;
+
+        // ========== ТРЕНИРОВКИ ==========
+        const workoutDetails = {
+            mon: {
+                title: "🏋️ ПОНЕДЕЛЬНИК — Силовая тренировка",
+                exercises: [
+                    "Разминка (10 мин): легкая кардио, суставная гимнастика",
+                    "Приседания с гантелями — 3×12",
+                    "Выпады с гантелями — 3×10 на каждую ногу",
+                    "Жим гантелей лежа на фитболе — 3×12",
+                    "Тяга гантели к поясу в наклоне — 3×12",
+                    "Подъем на тумбу (степ-ап) — 3×10",
+                    "Планка — 3×30 сек",
+                    "Заминка и растяжка (10 мин)"
+                ],
+                inventory: ["гантели 2-3 кг", "коврик", "фитбол", "тумба/ступенька"]
+            },
+            wed: {
+                title: "🏊 СРЕДА — Аквааэробика",
+                exercises: [
+                    "Разминка в воде (10 мин): ходьба, бег на месте",
+                    "Махи ногами у бортика — 3×15",
+                    "Подъем коленей к груди — 3×15",
+                    "Выпрыгивания из воды — 3×12",
+                    "Работа рук с нудлс — 3×15",
+                    "Плавание с доской (ноги работают) — 5-10 мин",
+                    "Упражнения на растяжку в воде (10 мин)"
+                ],
+                inventory: ["нудлс", "доска для плавания", "купальник", "шапочка"]
+            },
+            fri: {
+                title: "🔥 ПЯТНИЦА — Силовая тренировка",
+                exercises: [
+                    "Разминка (10 мин): прыжки, махи, вращения",
+                    "Приседания сумо с гантелей — 3×12",
+                    "Отжимания от пола/колен — 3×10",
+                    "Тяга гантелей в наклоне — 3×12",
+                    "Выпады назад с гантелями — 3×10",
+                    "Подъем таза лежа — 3×15",
+                    "Боковая планка — 3×20 сек",
+                    "Заминка и растяжка (10 мин)"
+                ],
+                inventory: ["гантели 3-5 кг", "коврик", "эспандер (опционально)"]
+            },
+            sun: {
+                title: "🧘 ВОСКРЕСЕНЬЕ — Стретчинг / Пилатес",
+                exercises: [
+                    "Дыхательные упражнения (5 мин)",
+                    "Кошка-корова — 10 повторений",
+                    "Растяжка спины (наклон к ногам сидя) — 30 сек",
+                    "Поза бабочки — 30 сек",
+                    "Растяжка подколенных сухожилий — 30 сек на ногу",
+                    "Поза ребенка — 1 мин",
+                    "Подъем ног лежа на боку — 3×10",
+                    "Скручивания лежа — 3×12",
+                    "Полная релаксация (шавасана) — 5 мин"
+                ],
+                inventory: ["коврик", "мяч для пилатеса", "лента/резинка", "блок для йоги"]
+            }
+        };
+
+        // ========== ФУНКЦИИ ПИТАНИЯ ==========
+        function renderFoodTables() {
+            const container = document.getElementById('food-tables');
+            if (!container) return;
+            
+            const categories = [
+                { id: 'veg', title: '🥬 Овощи', color: '#A3D9A5' },
+                { id: 'protein', title: '🍗 Белки', color: '#FFD1DC' },
+                { id: 'carbs', title: '🍚 Углеводы', color: '#FFE5B4' }
+            ];
+            
+            container.innerHTML = categories.map(cat => `
+                <div class="food-category">
+                    <h3 style="background: ${cat.color}; color: #333;">${cat.title}</h3>
+                    <div class="food-grid" data-category="${cat.id}">
+                        ${products[cat.id].map(product => `
+                            <div class="food-item" data-category="${cat.id}" data-name="${product.name}" data-cal="${product.cal}">
+                                <span>${product.name}</span>
+                                <span style="font-weight:600;">${product.cal} ккал</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+            
+            document.querySelectorAll('.food-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const category = item.dataset.category;
+                    const name = item.dataset.name;
+                    const cal = parseInt(item.dataset.cal);
+                    addProductToMeal(category, { name, cal });
+                });
+            });
+        }
+        
+        function addProductToMeal(category, product) {
+            currentMeal[category].push(product);
+            updatePlateVisual();
+            updateTotalCalories();
+        }
+        
+        function updatePlateVisual() {
+            const sectors = document.querySelectorAll('.plate-sector');
+            sectors.forEach(sector => {
+                sector.style.opacity = '0.6';
+                setTimeout(() => {
+                    sector.style.opacity = '0.85';
+                }, 200);
+            });
+        }
+        
+        function getTotalCalories() {
+            let total = 0;
+            for (let cat in currentMeal) {
+                currentMeal[cat].forEach(product => { total += product.cal; });
+            }
+            return total;
+        }
+        
+        function updateTotalCalories() {
+            const totalEl = document.getElementById('total-calories');
+            if (totalEl) totalEl.textContent = getTotalCalories();
+        }
+
+        // ========== ФУНКЦИИ ВОДЫ ==========
+        function createWaterBattery() {
+            const container = document.getElementById('water-battery');
+            if (!container) {
+                console.log('Контейнер water-battery не найден');
+                return;
+            }
+            container.innerHTML = '';
+            for (let i = 0; i < WATER_GOAL; i++) {
+                const segment = document.createElement('div');
+                segment.className = 'battery-segment';
+                container.appendChild(segment);
+            }
+            updateWaterDisplay();
+        }
+        
+        function updateWaterDisplay() {
+            const segments = document.querySelectorAll('.battery-segment');
+            const counter = document.getElementById('water-counter-display');
+            const congrats = document.getElementById('congrats');
+            
+            segments.forEach((segment, index) => {
+                if (index < waterCount) {
+                    segment.classList.add('active');
+                } else {
+                    segment.classList.remove('active');
+                }
+            });
+            
+            if (counter) counter.textContent = `🥤 Выпито ${waterCount} из ${WATER_GOAL}`;
+            if (congrats) congrats.style.display = waterCount >= WATER_GOAL ? 'block' : 'none';
+            
+            try { localStorage.setItem('waterCount', waterCount); } catch(e) {}
+        }
+        
+        function addWater() {
+            if (waterCount < WATER_GOAL) {
+                waterCount++;
+                updateWaterDisplay();
+                // Анимация батарейки
+                const newSegment = document.querySelectorAll('.battery-segment')[waterCount - 1];
+                if (newSegment) {
+                    newSegment.style.transform = 'scaleY(1.1)';
+                    setTimeout(() => { if(newSegment) newSegment.style.transform = ''; }, 200);
+                }
+            }
+        }
+        
+        function resetWater() {
+            waterCount = 0;
+            updateWaterDisplay();
+        }
+
+        // ========== ФУНКЦИИ ТРЕНИРОВОК ==========
+        function openWorkoutModal(day) {
+            const modal = document.getElementById('workout-modal');
+            const modalTitle = document.getElementById('modal-day-title');
+            const modalDetails = document.getElementById('modal-workout-details');
+            
+            const workout = workoutDetails[day];
+            if (!workout) return;
+            
+            modalTitle.textContent = workout.title;
+            
+            modalDetails.innerHTML = `
+                <h4><i class="fas fa-list-check"></i> Упражнения:</h4>
+                <ul>${workout.exercises.map(ex => `<li>${ex}</li>`).join('')}</ul>
+                <h4><i class="fas fa-bag-shopping"></i> Инвентарь:</h4>
+                <ul>${workout.inventory.map(item => `<li>${item}</li>`).join('')}</ul>
+                <p style="margin-top: 15px; color: var(--sage-green);">💪 Отличная тренировка ждёт тебя!</p>
+            `;
+            
+            modal.classList.add('open');
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('workout-modal');
+            if (modal) modal.classList.remove('open');
+        }
+        
+        function showWeeklySchedule() {
+            const modal = document.getElementById('workout-modal');
+            const modalTitle = document.getElementById('modal-day-title');
+            const modalDetails = document.getElementById('modal-workout-details');
+            
+            modalTitle.textContent = '📅 Расписание на неделю';
+            modalDetails.innerHTML = `
+                <h4>🏋️ Понедельник</h4>
+                <p>Силовая (60 мин) — гантели, тумба, коврик</p>
+                <h4>🏊 Среда</h4>
+                <p>Аквааэробика (60 мин) — бассейн, нудлс</p>
+                <h4>🔥 Пятница</h4>
+                <p>Силовая (60 мин) — гантели, коврик</p>
+                <h4>🧘 Воскресенье</h4>
+                <p>Стретчинг / Пилатес (60 мин) — коврик, мяч, лента</p>
+                <hr>
+                <p><i class="fas fa-info-circle"></i> Нажмите на любой день выше, чтобы увидеть подробные упражнения!</p>
+            `;
+            modal.classList.add('open');
+        }
+
+        // ========== ИНИЦИАЛИЗАЦИЯ ==========
+        function init() {
+            console.log('Инициализация приложения...');
+            
+            // 1. Питание
+            renderFoodTables();
+            
+            // 2. Вода
+            const savedWater = localStorage.getItem('waterCount');
+            if (savedWater !== null) waterCount = parseInt(savedWater);
+            createWaterBattery();
+            
+            const addBtn = document.getElementById('addWaterBtn');
+            const resetBtn = document.getElementById('resetWaterBtn');
+            if (addBtn) addBtn.addEventListener('click', addWater);
+            if (resetBtn) resetBtn.addEventListener('click', resetWater);
+            
+            // 3. Тренировки - клики по дням
+            const dayBlocks = document.querySelectorAll('.day-block');
+            console.log('Найдено блоков тренировок:', dayBlocks.length);
+            dayBlocks.forEach(block => {
+                block.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const day = this.dataset.day;
+                    console.log('Клик по дню:', day);
+                    openWorkoutModal(day);
+                });
+            });
+            
+            // 4. Кнопка "Подробное расписание"
+            const openModalBtn = document.getElementById('open-modal-btn');
+            if (openModalBtn) {
+                openModalBtn.addEventListener('click', showWeeklySchedule);
+            }
+            
+            // 5. Закрытие модалки
+            const closeBtn = document.getElementById('close-modal-btn');
+            if (closeBtn) closeBtn.addEventListener('click', closeModal);
+            
+            const modal = document.getElementById('workout-modal');
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeModal();
+                });
+            }
+            
+            // 6. Клики по секторам тарелки
+            document.querySelectorAll('.plate-sector').forEach(sector => {
+                sector.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const cat = sector.dataset.cat;
+                    let message = '';
+                    if (cat === 'veg') message = '🥬 Добавьте овощи из списка ниже';
+                    else if (cat === 'protein') message = '🍗 Добавьте белки из списка ниже';
+                    else if (cat === 'carbs') message = '🍚 Добавьте углеводы из списка ниже';
+                    alert(message);
+                });
+            });
+            
+            console.log('Инициализация завершена');
+        }
+        
+        // Запуск после полной загрузки страницы
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+</script>
+</body>
+</html>
